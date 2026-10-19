@@ -10,6 +10,10 @@ Two passes.
    identifier tokens are ignored, because punctuation runs and bare syntax
    ("end for k = 1 : numel") match everywhere and mean nothing.
 
+4. Prose pass: longest shared run of whole words against the help text of the
+   same files, reported at eight words or more. Formula fragments and file
+   paths stay below that.
+
 This script and PROVENANCE.md are skipped, since both quote the marker strings
 and the example snippets deliberately.
 
@@ -238,9 +242,63 @@ def main():
         print(f"  {rel}: {length} tokens  '{snippet}'")
         print(f"      {mpath}")
 
+    # ---- pass 4: prose. Longest shared run of whole words against the help
+    # text of the same toolbox files. Eight words is long enough that formula
+    # fragments and file paths cannot reach it.
+    print("\npass 4, longest shared word run (threshold 8 words) ...")
+    WORD_RE = re.compile(r"[a-z0-9]+")
+
+    def words(text):
+        return WORD_RE.findall(text.lower())
+
+    word_corpus = {}
+    for base in ("toolbox/wavelet", "toolbox/shared/signalwavelet"):
+        for b, _, fs in os.walk(os.path.join(args.matlab, base)):
+            for name in fs:
+                if not name.endswith(".m"):
+                    continue
+                path = os.path.join(b, name)
+                try:
+                    if os.path.getsize(path) < 4_000_000:
+                        word_corpus[path] = words(
+                            open(path, encoding="utf-8", errors="replace").read())
+                except OSError:
+                    pass
+    WSEED = 6
+    windex = {}
+    for path, w in word_corpus.items():
+        for j in range(len(w) - WSEED + 1):
+            windex.setdefault(tuple(w[j : j + WSEED]), []).append((path, j))
+
+    prose_hits = []
+    for path in files:
+        rel = os.path.relpath(path, REPO)
+        w = words(open(path, encoding="utf-8", errors="replace").read())
+        best = (0, "", "")
+        for i in range(len(w) - WSEED + 1):
+            for mpath, j in windex.get(tuple(w[i : i + WSEED]), ()):
+                mw = word_corpus[mpath]
+                a, b = i, j
+                while a > 0 and b > 0 and w[a - 1] == mw[b - 1]:
+                    a -= 1
+                    b -= 1
+                n = 0
+                while a + n < len(w) and b + n < len(mw) and w[a + n] == mw[b + n]:
+                    n += 1
+                if n > best[0]:
+                    best = (n, " ".join(w[a : a + n]), os.path.relpath(mpath, args.matlab))
+        if best[0] >= 8:
+            prose_hits.append((rel, best[0], best[1], best[2]))
+
+    print(f"  {len(word_corpus)} .m files, {len(windex)} distinct word windows")
+    print(f"  {len(prose_hits)} file(s) with a run of 8 or more shared words")
+    for rel, n, snippet, mpath in prose_hits[:20]:
+        print(f"    {rel}: {n} words '{snippet}'  <- {mpath}")
+
     print("\nsummary")
     print(f"  markers: {len(marker_hits)}")
     print(f"  shared {args.window}-token windows: {len(hits)}")
+    print(f"  shared 8-word prose runs: {len(prose_hits)}")
     print(f"  longest shared run: {max([w[1] for w in worst], default=0)} tokens")
     return 0
 

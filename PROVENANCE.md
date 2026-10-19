@@ -65,6 +65,8 @@ pass 2, 6037 .m files, 1746663 distinct windows
     probe/probe6.m:  end for k = 1 : numel (
     probe/probe6.m:  sst , f ] = wsst ( x
 pass 3, longest shared run: 0 tokens
+pass 4, 958 .m files, 382343 distinct word windows
+  files with a run of 8 or more shared words: 0
 ```
 
 The single marker hit is the word "MathWorks" in the README's disclaimer. The
