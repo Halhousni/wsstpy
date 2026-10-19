@@ -34,6 +34,34 @@ computes 0.8610275430057707, and the latter was confirmed by two independent
 quadrature methods. The full tables, every individual case, are in
 [VALIDATION.md](VALIDATION.md) together with the scripts that produced them.
 
+![Synchrosqueezed transforms from MATLAB and wsstpy, and their difference](figures/sst_comparison.png)
+
+The two left columns are the same matrix computed twice, once in MATLAB and
+once here, for a chirp and for random noise (1024 samples). They are drawn on
+identical colour scales. The right column is the absolute difference, on a log
+scale from 1e-17 to 1e-14: it peaks at 1.6e-15 and follows the ridge, which is
+where the coefficients are largest. Empty cells are zero in both.
+
+![Ridge agreement, cumulative residual, relative difference](figures/residuals_and_ridges.png)
+
+Left: the ridge MATLAB finds and the ridge wsstpy finds, drawn as a wide grey
+line and a thin dashed red line. Every one of the 1024 row indices is equal.
+Centre: the cumulative distribution of the residual, measured in machine
+epsilon of the peak coefficient. Half the coefficients of the chirp are within
+0.05 epsilon of the peak and 99 percent within 7 epsilon; the largest residual
+of either case is 38 epsilon, which is 1.6e-15 in absolute terms. Right: the
+relative difference of every coefficient above 1e-6, all below 1e-14.
+
+To be precise about the word identical: quantities that are discrete, such as
+ridge row indices, come out exactly equal. Continuous quantities agree to a
+few units in the last place, not bit for bit, because MATLAB and NumPy sum the
+reassembled coefficients in a different order and use different FFT code. A
+tiny fraction of coefficients, 0.02 percent of the non-zero ones, happen to be
+equal to the last bit.
+
+Regenerate the figures with `python scripts/make_validation_figure.py`, which
+needs the MATLAB reference files in `probe/data5` and `probe/data6`.
+
 ## Why this exists
 
 MATLAB's `wsst` lives in the Wavelet Toolbox, which needs a paid licence and

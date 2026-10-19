@@ -35,6 +35,25 @@ Test signals:
 
 Lengths 256, 512, 1000, 1024, 1025 and 4096. `k = 0..N-1`.
 
+## Figures
+
+![MATLAB and wsstpy synchrosqueezed transforms, with the difference](figures/sst_comparison.png)
+
+Rows: chirp and random noise, 1024 samples, Morlet wavelet, 32 voices per
+octave. Columns: MATLAB, wsstpy, and the absolute difference on a log scale
+between 1e-17 and 1e-14. The difference follows the ridge, where the
+coefficients are largest, and peaks at 1.6e-15.
+
+![Ridges, cumulative residual, relative difference](figures/residuals_and_ridges.png)
+
+Left: ridge index against sample for MATLAB (wide grey) and wsstpy (thin
+dashed red), 1024 of 1024 rows equal. Centre: cumulative distribution of the
+residual in units of machine epsilon of the peak coefficient. Right: relative
+difference against coefficient magnitude.
+
+`python scripts/make_validation_figure.py` regenerates both. It reads the
+MATLAB arrays from `probe/data5` and `probe/data6`.
+
 ## Forward transform
 
 `wsst` with the analytic Morlet wavelet, 32 voices per octave, periodic
