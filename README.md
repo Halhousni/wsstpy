@@ -190,8 +190,8 @@ each extracted ridge are removed from the cost before the next search.
 - `ScalingCoefficients` and the low-pass boundary term of `cwt` are not
   implemented. Use `extend_signal=True`, MATLAB's default, for boundary
   handling.
-- Calling `wsst` with no output arguments plots in MATLAB. Here it always
-  returns arrays, and plotting is left to Matplotlib.
+- With no output arguments, MATLAB's `wsst` draws a figure. Here the function
+  always returns arrays, and plotting is left to Matplotlib.
 - `icwt` does not accept time tables.
 
 ## Licence
