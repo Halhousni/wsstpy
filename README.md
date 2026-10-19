@@ -45,16 +45,20 @@ pipelines and on servers without MATLAB.
 ## Install
 
 ```bash
-pip install wsstpy
+pip install git+https://github.com/Halhousni/wsstpy.git
 ```
 
 Requires Python 3.9 or newer, NumPy and SciPy. Matplotlib is needed only for
 the plotting examples. From a checkout:
 
 ```bash
+git clone https://github.com/Halhousni/wsstpy
+cd wsstpy
 pip install -e ".[dev]"
 pytest
 ```
+
+The package is not on PyPI yet.
 
 ## Quick start
 
