@@ -4,11 +4,14 @@ Two passes.
 
 1. Marker scan: strings that only appear in MATLAB toolbox source (codegen
    pragmas, package-private names, MathWorks copyright lines, mex scaffolding).
-2. Shared-token scan: every 10-token window of every text file in this repo is
-   compared against every 10-token window of every .m file in a MATLAB
-   installation. A hit means a run of ten consecutive tokens is identical.
-   Formula-level overlap of a few tokens is expected and reported separately
-   with a lower threshold.
+2. Shared-token scan: every window of this repository's text files is compared
+   against every window of every .m file in a MATLAB installation. A hit means
+   a run of consecutive tokens is identical. Windows with fewer than four
+   identifier tokens are ignored, because punctuation runs and bare syntax
+   ("end for k = 1 : numel") match everywhere and mean nothing.
+
+This script and PROVENANCE.md are skipped, since both quote the marker strings
+and the example snippets deliberately.
 
 Usage:
     python scripts/check_provenance.py [--matlab /usr/local/MATLAB/R2025b]
@@ -64,6 +67,17 @@ def window_hashes(tokens, n):
         yield hashlib.blake2b(key.encode(), digest_size=8).digest(), i
 
 
+# Files that quote the marker strings or the example snippets on purpose.
+SKIP = {
+    os.path.join("scripts", "check_provenance.py"),
+    "PROVENANCE.md",
+}
+
+
+def skip(rel):
+    return rel in SKIP
+
+
 def repo_files():
     out = []
     for root, dirs, files in os.walk(REPO):
@@ -72,7 +86,10 @@ def repo_files():
             continue
         for name in files:
             if os.path.splitext(name)[1] in TEXT_EXT:
-                out.append(os.path.join(root, name))
+                full = os.path.join(root, name)
+                if skip(os.path.relpath(full, REPO)):
+                    continue
+                out.append(full)
     return sorted(out)
 
 
@@ -107,8 +124,6 @@ def main():
         rel = os.path.relpath(path, REPO)
         with open(path, encoding="utf-8", errors="replace") as fh:
             for lineno, line in enumerate(fh, 1):
-                if rel.startswith("scripts" + os.sep + "check_provenance.py"):
-                    continue
                 for marker in MARKERS:
                     if marker in line:
                         marker_hits.append((rel, lineno, marker, line.strip()[:120]))
@@ -135,8 +150,6 @@ def main():
     hits = []
     for path in files:
         rel = os.path.relpath(path, REPO)
-        if rel.startswith("scripts" + os.sep + "check_provenance.py"):
-            continue
         text = open(path, encoding="utf-8", errors="replace").read()
         tokens = tokenize(text)
         for digest, pos in window_hashes(tokens, args.window):
@@ -210,8 +223,6 @@ def main():
     worst = []
     for path in files:
         rel = os.path.relpath(path, REPO)
-        if rel.startswith("scripts" + os.sep + "check_provenance.py"):
-            continue
         toks = tokenize(open(path, encoding="utf-8", errors="replace").read())
         best = (0, "", "")
         for mrel, mtoks in corpus:

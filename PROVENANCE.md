@@ -47,6 +47,9 @@ MATLAB tree. It runs three passes:
 2. Eight-token window matching against every `.m` file in the Wavelet
    Toolbox, the shared signalwavelet package and the signal toolbox, keeping
    only windows that contain at least four identifier tokens.
+
+The script and this file are excluded from the scan, because both quote the
+marker strings and the example snippets on purpose.
 3. Longest common token run per repository file against the eighteen files
    listed above, reporting only runs that contain five or more identifiers.
 
