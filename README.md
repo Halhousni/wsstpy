@@ -201,7 +201,9 @@ MIT, see [LICENSE](LICENSE).
 This is not affiliated with MathWorks and contains no MATLAB source code. It
 is an implementation of the published synchrosqueezing algorithm, written from
 the papers and matched numerically against the behaviour of the MATLAB
-functions.
+functions. [PROVENANCE.md](PROVENANCE.md) lists the MATLAB files that were read
+for conventions, and `scripts/check_provenance.py` checks the repository
+against an installed MATLAB tree, reporting every token window it shares.
 
 ## References
 

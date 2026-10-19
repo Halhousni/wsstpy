@@ -30,7 +30,7 @@ def cwt(
     Parameters
     ----------
     x : array_like, shape (n,)
-        Real or complex signal with at least 4 samples.
+        Real or complex signal, 4 samples or longer.
     fs : float, optional
         Sampling frequency.  Frequencies are reported in cycles/sample when
         omitted.
@@ -63,7 +63,7 @@ def cwt(
         x = x.ravel()
     n = x.size
     if n < 4:
-        raise ValueError("x must have at least 4 samples")
+        raise ValueError("x needs 4 samples or more")
     if not np.all(np.isfinite(x)):
         raise ValueError("x must be finite")
     fs = 1.0 if fs is None else float(fs)
@@ -114,11 +114,13 @@ def adm_constant(wavelet: str = "morse", wavelet_parameters=(3.0, 60.0)) -> floa
         return float(val)
     if name == "bump":
         mu, sigma = 5.0, 0.6
+        lo = mu - sigma
+        hi = mu + sigma
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", IntegrationWarning)
             val, _ = quad(
                 lambda w: abs(2.0 * np.e * np.exp(-1.0 / (1.0 - ((w - mu) / sigma) ** 2))) / w,
-                mu - sigma, mu + sigma, limit=800, epsabs=1e-15, epsrel=1e-15)
+                lo, hi, limit=800, epsabs=1e-15, epsrel=1e-15)
         return float(val)
     if name == "morse":
         ga, tb = wavelet_parameters

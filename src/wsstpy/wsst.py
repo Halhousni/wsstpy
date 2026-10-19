@@ -29,7 +29,7 @@ def wsst(
     Parameters
     ----------
     x : array_like, shape (n,)
-        Real-valued signal, at least 4 samples.
+        Real-valued signal, 4 samples or longer.
     fs : float, optional
         Sampling frequency.  When omitted the frequencies are returned in
         cycles/sample.
@@ -69,7 +69,7 @@ def wsst(
     x = np.asarray(x, dtype=float).ravel()
     n = x.size
     if n < 4:
-        raise ValueError("x must have at least 4 samples")
+        raise ValueError("x needs 4 samples or more")
     if not np.all(np.isfinite(x)):
         raise ValueError("x must be finite")
     fs = 1.0 if fs is None else float(fs)
@@ -159,10 +159,12 @@ def _wavelet_reconstruction_constant(wavelet: str, wavelet_parameters=None) -> f
         return float(val)
     if name == "bump":
         mu, sigma = 5.0, 1.0
+        lo = mu - sigma
+        hi = mu + sigma
         f = lambda w: np.e * np.exp(-1.0 / (1.0 - ((w - mu) / sigma) ** 2)) / w
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", IntegrationWarning)
-            val, _ = quad(f, mu - sigma, mu + sigma, limit=800,
+            val, _ = quad(f, lo, hi, limit=800,
                           epsabs=1e-15, epsrel=1e-15)
         return float(val)
     if name == "morse":

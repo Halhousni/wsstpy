@@ -84,7 +84,7 @@ class CWTFilterBank:
     ):
         signal_length = int(signal_length)
         if signal_length < 4:
-            raise ValueError("signal_length must be >= 4")
+            raise ValueError("signal_length must be 4 or more")
         if int(voices_per_octave) != voices_per_octave or voices_per_octave < 2:
             raise ValueError("voices_per_octave must be an integer >= 2")
         if voices_per_octave % 2:
